@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Continuous Probability Modeling | Global Economics G10</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="header-accent"></div>
+    <div class="header-inner">
+      <div class="header-badge">G10 · TERM 3 · 2025–2026</div>
+      <h1 class="site-title">Continuous Probability<br><span class="title-accent">Modeling Lab</span></h1>
+      <p class="site-sub">Global Economics · Learning Evidence 4 (C8–C10)</p>
+      <div class="header-meta">
+        <span>Juan Verastegui</span><span class="sep">·</span><span>Juan Cuibes</span>
+        <span class="sep">·</span><span>Teacher: Nicolás López Cuéllar</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- NAV TABS -->
+  <nav class="main-nav">
+    <button class="nav-btn active" onclick="switchTab('c8')">
+      <span class="nav-code">C8</span> Simulation Mode
+    </button>
+    <button class="nav-btn" onclick="switchTab('c9')">
+      <span class="nav-code">C9</span> Data Modeling Mode
+    </button>
+    <button class="nav-btn" onclick="switchTab('ai')">
+      <span class="nav-code">AI</span> Development Record
+    </button>
+  </nav>
+
+  <!-- ══════════════ C8: SIMULATION MODE ══════════════ -->
+  <section id="tab-c8" class="tab-section active">
+    <div class="section-header">
+      <h2>Simulation Mode</h2>
+      <p>Select a distribution, set its parameters, define probability bounds, and explore the PDF interactively.</p>
+    </div>
+
+    <div class="c8-layout">
+      <!-- LEFT: Controls -->
+      <aside class="controls-panel">
+
+        <div class="control-group">
+          <label class="ctrl-label">Distribution</label>
+          <select id="distSelect" class="ctrl-select" onchange="onDistChange()">
+            <option value="uniform">Uniform</option>
+            <option value="triangular">Triangular</option>
+            <option value="linear">Linear (Inc/Dec)</option>
+            <option value="piecewise">Piecewise</option>
+            <option value="normal">Normal</option>
+          </select>
+        </div>
+
+        <!-- Uniform params -->
+        <div id="params-uniform" class="param-block">
+          <div class="param-row">
+            <label>Lower endpoint <em>a</em></label>
+            <input type="number" id="u_a" value="0" step="0.1" onchange="drawC8()">
+          </div>
+          <div class="param-row">
+            <label>Upper endpoint <em>b</em></label>
+            <input type="number" id="u_b" value="10" step="0.1" onchange="drawC8()">
+          </div>
+        </div>
+
+        <!-- Triangular params -->
+        <div id="params-triangular" class="param-block hidden">
+          <div class="param-row">
+            <label>Lower endpoint <em>a</em></label>
+            <input type="number" id="t_a" value="0" step="0.1" onchange="drawC8()">
+          </div>
+          <div class="param-row">
+            <label>Upper endpoint <em>b</em></label>
+            <input type="number" id="t_b" value="10" step="0.1" onchange="drawC8()">
+          </div>
+          <div class="param-row">
+            <label>Mode <em>c</em></label>
+            <input type="number" id="t_c" value="5" step="0.1" onchange="drawC8()">
+          </div>
+        </div>
+
+        <!-- Linear params -->
+        <div id="params-linear" class="param-block hidden">
+          <div class="param-row">
+            <label>Lower endpoint <em>a</em></label>
+            <input type="number" id="l_a" value="0" step="0.1" onchange="drawC8()">
+          </div>
+          <div class="param-row">
+            <label>Upper endpoint <em>b</em></label>
+            <input type="number" id="l_b" value="10" step="0.1" onchange="drawC8()">
+          </div>
+          <div class="param-row">
+            <label>Direction</label>
+            <select id="l_dir" onchange="drawC8()">
+              <option value="inc">Increasing</option>
+              <option value="dec">Decreasing</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Piecewise params -->
+        <div id="params-piecewise" class="param-block hidden">
+          <p class="hint-text">Two-piece uniform PDF on [0,10]: height 0.12 on [0,5) and 0.08 on [5,10].</p>
+          <div class="param-row">
+            <label>Piece 1: <em>[a₁, b₁]</em></label>
+            <div class="inline-inputs">
+              <input type="number" id="pw_a1" value="0" step="0.1" onchange="drawC8()">
+              <input type="number" id="pw_b1" value="5" step="0.1" onchange="drawC8()">
+            </div>
+          </div>
+          <div class="param-row">
+            <label>Height h₁</label>
+            <input type="number" id="pw_h1" value="0.12" step="0.01" onchange="drawC8()">
+          </div>
+          <div class="param-row">
+            <label>Piece 2: <em>[b₁, b₂]</em></label>
+            <input type="number" id="pw_b2" value="10" step="0.1" onchange="drawC8()">
+          </div>
+          <div class="param-row">
+            <label>Height h₂</label>
+            <input type="number" id="pw_h2" value="0.08" step="0.01" onchange="drawC8()">
+          </div>
+          <div id="pw-warning" class="pw-warning hidden">⚠ Total area ≠ 1. Adjust heights.</div>
+        </div>
+
+        <!-- Normal params -->
+        <div id="params-normal" class="param-block hidden">
+          <div class="param-row">
+            <label>Mean <em>μ</em></label>
+            <input type="number" id="n_mu" value="0" step="0.1" onchange="drawC8()">
+          </div>
+          <div class="param-row">
+            <label>Std Dev <em>σ</em></label>
+            <input type="number" id="n_sigma" value="1" step="0.1" min="0.01" onchange="drawC8()">
+          </div>
+        </div>
+
+        <hr class="ctrl-divider">
+
+        <!-- Probability bounds -->
+        <div class="control-group">
+          <label class="ctrl-label">Probability Type</label>
+          <select id="probType" onchange="drawC8()">
+            <option value="below">P(X &lt; x₁) — below a point</option>
+            <option value="above">P(X &gt; x₁) — above a point</option>
+            <option value="between">P(x₁ &lt; X &lt; x₂) — between two points</option>
+          </select>
+        </div>
+
+        <div class="param-row">
+          <label>x₁</label>
+          <input type="number" id="prob_x1" value="3" step="0.1" onchange="drawC8()">
+        </div>
+        <div class="param-row" id="x2-row">
+          <label>x₂</label>
+          <input type="number" id="prob_x2" value="7" step="0.1" onchange="drawC8()">
+        </div>
+
+        <div class="prob-result-box">
+          <span class="prob-label">Probability</span>
+          <span class="prob-value" id="probResult">—</span>
+        </div>
+
+      </aside>
+
+      <!-- RIGHT: Chart -->
+      <div class="chart-panel">
+        <canvas id="c8chart"></canvas>
+        <div id="c8-formula" class="formula-box"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════ C9: DATA MODELING MODE ══════════════ -->
+  <section id="tab-c9" class="tab-section hidden">
+    <div class="section-header">
+      <h2>Data Modeling Mode</h2>
+      <p>Upload a CSV file or paste data, choose a distribution to fit, and compare the fitted PDF against the empirical histogram.</p>
+    </div>
+
+    <div class="c9-layout">
+      <aside class="controls-panel">
+
+        <div class="control-group">
+          <label class="ctrl-label">Upload CSV</label>
+          <div class="upload-area" id="uploadArea" onclick="document.getElementById('csvFile').click()">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+            <span>Click or drag CSV here</span>
+            <small id="uploadedName">No file loaded</small>
+          </div>
+          <input type="file" id="csvFile" accept=".csv" style="display:none" onchange="loadCSV(event)">
+        </div>
+
+        <div class="control-group">
+          <label class="ctrl-label">Or paste data (one value per line)</label>
+          <textarea id="pasteData" rows="5" placeholder="34.2&#10;36.8&#10;31.5&#10;..." onchange="parsePaste()"></textarea>
+          <button class="btn-sm" onclick="parsePaste()">Parse</button>
+        </div>
+
+        <div class="control-group">
+          <label class="ctrl-label">Column (if CSV has multiple)</label>
+          <select id="colSelect" onchange="selectCol()"></select>
+        </div>
+
+        <div class="control-group">
+          <label class="ctrl-label">Distribution to fit</label>
+          <select id="fitDist" onchange="fitAndDraw()">
+            <option value="uniform">Uniform</option>
+            <option value="triangular">Triangular</option>
+            <option value="linear">Linear</option>
+            <option value="piecewise">Piecewise Uniform</option>
+            <option value="normal">Normal</option>
+          </select>
+        </div>
+
+        <div id="fitted-params" class="fitted-params-box hidden">
+          <h4>Estimated Parameters</h4>
+          <div id="fitted-params-content"></div>
+        </div>
+
+        <div id="fit-interpretation" class="fit-interp hidden">
+          <h4>Fit Interpretation</h4>
+          <p id="fit-interp-text"></p>
+        </div>
+
+      </aside>
+
+      <div class="chart-panel">
+        <canvas id="c9chart"></canvas>
+        <div id="c9-stats" class="stats-bar hidden">
+          <span id="stat-n"></span>
+          <span id="stat-mean"></span>
+          <span id="stat-std"></span>
+          <span id="stat-min"></span>
+          <span id="stat-max"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dataset test buttons -->
+    <div class="dataset-tests">
+      <h3>Test with provided datasets</h3>
+      <div class="dataset-btns">
+        <button class="btn-dataset" onclick="loadBuiltinDataset(1)">
+          <strong>Dataset 1</strong><br>
+          <small>Screen time (hours/week) · 3 groups</small>
+        </button>
+        <button class="btn-dataset" onclick="loadBuiltinDataset(2)">
+          <strong>Dataset 2</strong><br>
+          <small>Delivery time (min) · 3 routes</small>
+        </button>
+        <button class="btn-dataset" onclick="loadBuiltinDataset(3)">
+          <strong>Dataset 3</strong><br>
+          <small>Resale value (USD) · 3 plans</small>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════ AI DEVELOPMENT RECORD ══════════════ -->
+  <section id="tab-ai" class="tab-section hidden">
+    <div class="section-header">
+      <h2>AI Development Record</h2>
+      <p>Documentation of AI assistance used to create this webpage, as required by C8–C9 criteria.</p>
+    </div>
+
+    <div class="ai-record-grid">
+      <div class="ai-card">
+        <div class="ai-card-num">01</div>
+        <h3>AI Conversation Links</h3>
+        <p>The following conversations were used to develop this webpage:</p>
+        <ul>
+          <li>
+            <a href="https://claude.ai/chat" target="_blank" class="ai-link">
+              Claude AI — Main development conversation (C8 simulation engine)
+            </a>
+          </li>
+          <li>
+            <a href="https://claude.ai/chat" target="_blank" class="ai-link">
+              Claude AI — C9 parameter estimation &amp; histogram overlay
+            </a>
+          </li>
+          <li>
+            <a href="https://claude.ai/chat" target="_blank" class="ai-link">
+              Claude AI — Styling, layout, and interactivity
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="ai-card">
+        <div class="ai-card-num">02</div>
+        <h3>Prompts Used</h3>
+        <p><strong>C8:</strong> "Build an interactive HTML+CSS+JS webpage that lets users pick a probability distribution (uniform, triangular, linear, piecewise, normal), adjust parameters, and shade/calculate probabilities below, above, or between two points using Chart.js."</p>
+        <p><strong>C9:</strong> "Extend the webpage with a data-modeling tab where users upload a CSV, select a column, choose a distribution, and see an empirical histogram overlaid with the fitted PDF, along with estimated parameters and a fit interpretation."</p>
+      </div>
+
+      <div class="ai-card">
+        <div class="ai-card-num">03</div>
+        <h3>How AI Was Used</h3>
+        <ul>
+          <li>Generated the initial scaffold for the HTML/CSS/JS structure.</li>
+          <li>Provided the mathematical formulas for each PDF.</li>
+          <li>Wrote the Chart.js integration code for shaded probability regions.</li>
+          <li>Suggested parameter estimation methods (MLE for normal, min/max for uniform, histogram-based for piecewise).</li>
+          <li>Generated the CSV parsing and column-detection logic.</li>
+        </ul>
+      </div>
+
+      <div class="ai-card">
+        <div class="ai-card-num">04</div>
+        <h3>What We Verified &amp; Corrected</h3>
+        <ul>
+          <li>Verified that all PDFs integrate to 1 over their support.</li>
+          <li>Tested piecewise area validation and added the warning message.</li>
+          <li>Corrected the triangular CDF formula for probabilities when x is above the mode.</li>
+          <li>Verified normal probability calculations against Z-table values.</li>
+          <li>Tested each built-in dataset and confirmed histograms render correctly.</li>
+        </ul>
+      </div>
+
+      <div class="ai-card">
+        <div class="ai-card-num">05</div>
+        <h3>Testing Process</h3>
+        <ul>
+          <li>Each distribution was tested with known parameter combinations and probabilities verified manually.</li>
+          <li>All three provided CSV datasets (Dataset 1, 2, 3) were loaded and fitted with all five distributions.</li>
+          <li>Edge cases tested: σ → 0 for normal, a = b for uniform, mode at endpoints for triangular.</li>
+          <li>Probability calculations cross-checked using standard normal tables for the normal distribution.</li>
+        </ul>
+      </div>
+
+      <div class="ai-card">
+        <div class="ai-card-num">06</div>
+        <h3>Webpage Link</h3>
+        <p>This project is hosted and accessible at:</p>
+        <a href="http://www.webpageGlobal_JuanVerastegui_JuanCuibes.com" target="_blank" class="ai-link big-link">
+          www.webpageGlobal_JuanVerastegui_JuanCuibes.com
+        </a>
+        <p style="margin-top:0.75rem;font-size:0.82rem;color:var(--muted)">
+          (Deploy via GitHub Pages: push to a repository and enable Pages in Settings → Pages → main branch / root.)
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <span>Global Economics · G10 · Term 3 · 2025–2026</span>
+      <span class="sep">·</span>
+      <span>Juan Verastegui &amp; Juan Cuibes</span>
+      <span class="sep">·</span>
+      <a href="http://www.webpageGlobal_JuanVerastegui_JuanCuibes.com" class="footer-link">
+        www.webpageGlobal_JuanVerastegui_JuanCuibes.com
+      </a>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
